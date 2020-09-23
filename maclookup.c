@@ -18,6 +18,19 @@ void display_usage(void) {
 	puts( "maclookup [-ucih] XX:XX:XX ");
 	exit( EXIT_FAILURE);
 }
+char *mac_sanitize(char *mac){
+	int i,j;
+	for(i=0,j=0; mac[i]; i++) {
+		if(mac[i] >= 'a' && mac[i] <= 'z') {
+			mac[i] = mac[i]-32;
+		}
+		if (mac[i]==':' || mac[i]=='-') continue;
+		mac[j] = mac[i];
+		j++;
+	}
+	mac[j]=0;
+	return mac;
+}
 void mac_lookup(void) {
 	char temp[512];
 	FILE *file = fopen("oui.txt", "r");
@@ -63,9 +76,11 @@ int main(int argc, char *argv[] ) {
 			}
 	}
 	globalArgs.macAddress = argv[optind];
+	globalArgs.macAddress = mac_sanitize(globalArgs.macAddress);
 	/*
 	printf("Update = %d, Config = %d, Information = %d \n", globalArgs.updOui, globalArgs.configure, globalArgs.information);
 	*/
+	// printf("MAC %s\n", globalArgs.macAddress);
 	mac_lookup();
 	return (EXIT_SUCCESS);
 }
