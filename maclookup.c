@@ -14,7 +14,7 @@ static const char *optString = "ucih?";
 
 void display_usage(void) {
 	puts( "maclookup - Display Vendor Information by MAC address");
-	puts( "USAGE:");
+	puts( "USAGE: ");
 	puts( "maclookup [-ucih] XX:XX:XX ");
 	exit( EXIT_FAILURE);
 }
