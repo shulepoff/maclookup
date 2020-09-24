@@ -71,7 +71,7 @@ char *mac_sanitize(char *mac){
 			mac[i] = mac[i]-32;
 		}
 		if (mac[i]==':' || mac[i]=='-') continue;
-		mac[j] = mac[i];
+		if (j<6) mac[j] = mac[i]; else mac[j]=0 ;
 		j++;
 	}
 	mac[j]=0;
@@ -115,7 +115,12 @@ void mac_lookup(void) {
 	}
 }
 void update_oui(void) {
-	FILE * f = popen("curl https://linuxnet.ca/ieee/oui.txt.bz2 | bzip2 -d > /tmp/oui.txt","r");
+	char str[125];
+	strcpy(str, "curl ");
+	strcat(str, config[Url]);
+	strcat(str, " | bzip2 -d > /tmp/oui.txt");
+	printf("%s\n",str);
+	FILE * f = popen(str,"r");
 	if (f==0) {
 		fprintf(stderr, "Could not update oui.txt \n");
 		exit(EXIT_FAILURE);
