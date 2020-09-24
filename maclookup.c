@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <ctype.h>
 
 struct globalArgs_t {
 	int updOui;		/* option -u */
@@ -12,6 +13,51 @@ struct globalArgs_t {
 
 static const char *optString = "ucih?";
 
+enum { Folder, Url, nKeys};
+char *keys[nKeys] = {
+	[Folder] = "folder",
+	[Url]	 = "url",
+};
+char *config[nKeys];
+char *trim(char *s) {
+	char *p = s + strlen(s) -1;
+	while (isascii(*s) && isspace(*s))
+		s++;
+	while (isascii(*p) && isspace(*p))
+		*p-- = '\0';
+	return s;
+}
+
+void rdconf(FILE *fd) {
+	char buf[81], *s, *p;
+	char *key, *value;
+	int i;
+
+	while (fgets(buf, sizeof(buf), fd) != NULL) {
+		s = trim(buf);
+
+		/* got comment or empty line? go ahead */
+		if (*s == '#' || *s == '\0')
+			continue;
+
+		/* not a key=value pair? go ahead */
+		p = strchr(s, '=');
+		if (!p)
+			continue;
+
+		/* separate key and value */
+		*p++ = '\0';
+
+		/* trim again in case there was a whitespace around '=' */
+		key = trim(s);
+		value = trim(p);
+
+		/* and store it finally */
+		for (i = 0; i < nKeys; i++)
+			if (strcmp(keys[i], key) == 0)
+				config[i] = strdup(value);
+	}	
+}
 void display_usage(void) {
 	puts( "maclookup - Display Vendor Information by MAC address");
 	puts( "USAGE: ");
@@ -31,14 +77,34 @@ char *mac_sanitize(char *mac){
 	mac[j]=0;
 	return mac;
 }
+void opncfg(void){
+     char *home, *filename;
+     home = getenv("HOME");
+     char *fname = "/.maclookup";
+     filename = strcat(home,fname);
+     FILE *f = fopen(filename,"r");
+     if (f) {
+		 rdconf(f);
+     }
+     else {
+         f = fopen(filename,"w");
+         printf("File %s created\n", filename);
+     }
+     fclose(f);
+}	
+void info_display(void){
+	printf("Folder ieee-data is %s \n",config[Folder]);
+	printf("URL for update oui.txt is %s \n",config[Url]);
+}
 void mac_lookup(void) {
 	char temp[512];
-	FILE *file = fopen("oui.txt", "r");
+	FILE *file = fopen(strcat(config[Folder],"/oui.txt"), "r");
+
 	if (!file) {
 		fprintf(stderr, "Error opening file");
 		exit( EXIT_FAILURE );
 	}
-	while(fgets(temp,512,file) != NULL) {
+	while(fgets(temp,sizeof(temp),file) != NULL) {
 		if ((strstr(temp, globalArgs.macAddress)) != NULL) {
 			printf("\n%s\n",temp);
 		}
@@ -49,7 +115,7 @@ void mac_lookup(void) {
 	}
 }
 void update_oui(void) {
-	FILE * f = popen("curl https://linuxnet.ca/ieee/oui.txt.bz2 | bzip2 -d > oui.txt","r");
+	FILE * f = popen("curl https://linuxnet.ca/ieee/oui.txt.bz2 | bzip2 -d > /tmp/oui.txt","r");
 	if (f==0) {
 		fprintf(stderr, "Could not update oui.txt \n");
 		exit(EXIT_FAILURE);
@@ -57,6 +123,9 @@ void update_oui(void) {
 	pclose(f);
 }
 int main(int argc, char *argv[] ) {
+	opncfg();
+	//printf("folder:   %s\n", config[Folder]);
+	//printf("url:    %s\n", config[Url]);
 	int opt = 0;
 	/* Init globalArgs before works */
 	globalArgs.updOui = 0;  /* False */
@@ -75,6 +144,7 @@ int main(int argc, char *argv[] ) {
 					break;
 				case 'i':
 					globalArgs.information = 1;
+					info_display();
 					break;
 				case 'h':
 				case '?':
