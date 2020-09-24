@@ -48,6 +48,14 @@ void mac_lookup(void) {
 		fclose(file);
 	}
 }
+void update_oui(void) {
+	FILE * f = popen("curl https://linuxnet.ca/ieee/oui.txt.bz2 | bzip2 -d > oui.txt","r");
+	if (f==0) {
+		fprintf(stderr, "Could not update oui.txt \n");
+		exit(EXIT_FAILURE);
+	}
+	pclose(f);
+}
 int main(int argc, char *argv[] ) {
 	int opt = 0;
 	/* Init globalArgs before works */
@@ -60,6 +68,7 @@ int main(int argc, char *argv[] ) {
 			switch(opt){
 				case 'u':
 					globalArgs.updOui = 1; /* True */
+					update_oui();
 					break;
 				case 'c':
 					globalArgs.configure = 1;
@@ -76,11 +85,13 @@ int main(int argc, char *argv[] ) {
 			}
 	}
 	globalArgs.macAddress = argv[optind];
-	globalArgs.macAddress = mac_sanitize(globalArgs.macAddress);
+	if (globalArgs.macAddress){
+		globalArgs.macAddress = mac_sanitize(globalArgs.macAddress);
 	/*
 	printf("Update = %d, Config = %d, Information = %d \n", globalArgs.updOui, globalArgs.configure, globalArgs.information);
 	*/
 	// printf("MAC %s\n", globalArgs.macAddress);
-	mac_lookup();
+		mac_lookup();
+	}
 	return (EXIT_SUCCESS);
 }
