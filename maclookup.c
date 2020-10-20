@@ -35,23 +35,18 @@ void rdconf(FILE *fd) {
 
 	while (fgets(buf, sizeof(buf), fd) != NULL) {
 		s = trim(buf);
-
 		/* got comment or empty line? go ahead */
 		if (*s == '#' || *s == '\0')
 			continue;
-
 		/* not a key=value pair? go ahead */
 		p = strchr(s, '=');
 		if (!p)
 			continue;
-
 		/* separate key and value */
 		*p++ = '\0';
-
 		/* trim again in case there was a whitespace around '=' */
 		key = trim(s);
 		value = trim(p);
-
 		/* and store it finally */
 		for (i = 0; i < nKeys; i++)
 			if (strcmp(keys[i], key) == 0)
@@ -61,11 +56,12 @@ void rdconf(FILE *fd) {
 void display_usage(void) {
 	puts( "maclookup - Display Vendor Information by MAC address");
 	puts( "USAGE: ");
-	puts( "maclookup [-ucih] XX:XX:XX ");
+	puts( "maclookup [-ucih] XX:XX:XX \n");
 	exit( EXIT_FAILURE);
 }
 char *mac_sanitize(char *mac){
 	int i,j;
+	/* UPPERCASE that AND remove ':' and '-' */
 	for(i=0,j=0; mac[i]; i++) {
 		if(mac[i] >= 'a' && mac[i] <= 'z') {
 			mac[i] = mac[i]-32;
@@ -95,13 +91,14 @@ void opncfg(void){
 void info_display(void){
 	printf("Folder ieee-data is %s \n",config[Folder]);
 	printf("URL for update oui.txt is %s \n",config[Url]);
+	exit( EXIT_FAILURE );
 }
 void mac_lookup(void) {
 	char temp[512];
 	FILE *file = fopen(strcat(config[Folder],"/oui.txt"), "r");
 
 	if (!file) {
-		fprintf(stderr, "Error opening file");
+		fprintf(stderr, "Error opening file \n");
 		exit( EXIT_FAILURE );
 	}
 	while(fgets(temp,sizeof(temp),file) != NULL) {
@@ -115,15 +112,28 @@ void mac_lookup(void) {
 	}
 }
 void update_oui(void) {
-	char str[125];
+	char str[255];
+	/* 1 - get oui.txt from web */
 	strcpy(str, "curl ");
 	strcat(str, config[Url]);
 	strcat(str, " | bzip2 -d > /tmp/oui.txt");
 	printf("%s\n",str);
+	/*
 	FILE * f = popen(str,"r");
 	if (f==0) {
 		fprintf(stderr, "Could not update oui.txt \n");
 		exit(EXIT_FAILURE);
+	}
+	pclose(f);
+	*/
+	/* 2 - copy oui.txt into directory from config */ 
+	strcpy(str,"cp /tmp/oui.txt ");
+	strcat(str, config[Folder]);
+	strcat(str, "/oui.txt");
+	FILE * f = popen(str,"r");
+	if (f==0) {
+		fprintf(stderr,"Could not copy oui.txt into directory \n");
+		exit( EXIT_FAILURE );
 	}
 	pclose(f);
 }
