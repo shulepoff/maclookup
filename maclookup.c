@@ -118,19 +118,19 @@ void update_oui(void) {
 	strcat(str, config[Url]);
 	strcat(str, " | bzip2 -d > /tmp/oui.txt");
 	printf("%s\n",str);
-	/*
+	
 	FILE * f = popen(str,"r");
 	if (f==0) {
 		fprintf(stderr, "Could not update oui.txt \n");
 		exit(EXIT_FAILURE);
 	}
 	pclose(f);
-	*/
+	
 	/* 2 - copy oui.txt into directory from config */ 
 	strcpy(str,"cp /tmp/oui.txt ");
 	strcat(str, config[Folder]);
 	strcat(str, "/oui.txt");
-	FILE * f = popen(str,"r");
+	f = popen(str,"r");
 	if (f==0) {
 		fprintf(stderr,"Could not copy oui.txt into directory \n");
 		exit( EXIT_FAILURE );
