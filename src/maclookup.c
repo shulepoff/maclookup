@@ -54,9 +54,15 @@ void rdconf(FILE *fd) {
 	}	
 }
 void display_usage(void) {
-	puts( "maclookup - Display Vendor Information by MAC address");
+	puts( "Maclookup 0.01 ( https://github.com/shulepoff/maclookup )");
+	puts( "	Display Vendor Information by MAC address");
 	puts( "USAGE: ");
-	puts( "maclookup [-ucih] XX:XX:XX \n");
+	puts( "	maclookup [-ucih] XX:XX:XX ");
+	puts( "OPTIONS: ");
+	puts( "	-c	- create config file");
+	puts( "	-i	- display info from configuration file");
+	puts( "	-u	- update oui.txt from web");
+	puts( "	-h	- display this help");
 	exit( EXIT_FAILURE);
 }
 char *mac_sanitize(char *mac){

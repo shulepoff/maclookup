@@ -1,7 +1,8 @@
-prefix=/usr/local
+DESTDIR ?= /usr/local
+SRC := src/maclookup.c
+CC = clang
 all:
-	clang maclookup.c -o maclookup
+	$(CC) -o maclookup $(SRC)
 install: maclookup
-	clang maclookup.c -o maclookup
-	install -m 0755 maclookup $(prefix)/bin
+	install -m 0755 maclookup $(DESTDIR)/bin
 
