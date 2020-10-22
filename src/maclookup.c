@@ -85,13 +85,15 @@ void opncfg(void){
      char *fname = "/.maclookup";
      filename = strcat(home,fname);
      FILE *f = fopen(filename,"r");
-     if (f) {
-		 rdconf(f);
-     }
-     else {
+     if (!f) {
          f = fopen(filename,"w");
+		 fprintf(f, "folder = /usr/share/ieee-data/\n");
+		 fprintf(f, "url = https://linuxnet.ca/ieee/oui.txt.bz2\n");
          printf("File %s created\n", filename);
+		 fclose(f);
+		 f = fopen(filename,"r");
      }
+	 rdconf(f);
      fclose(f);
 }	
 void info_display(void){
@@ -135,7 +137,7 @@ void update_oui(void) {
 	/* 2 - copy oui.txt into directory from config */ 
 	strcpy(str,"cp /tmp/oui.txt ");
 	strcat(str, config[Folder]);
-	strcat(str, "/oui.txt");
+	strcat(str, "oui.txt");
 	f = popen(str,"r");
 	if (f==0) {
 		fprintf(stderr,"Could not copy oui.txt into directory \n");
