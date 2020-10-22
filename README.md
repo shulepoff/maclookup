@@ -1,4 +1,4 @@
-# maclookup
+# Maclookup
 Программа для поиска вендора по аппаратному (MAC) адресу
 
 ![Example](./maclookup.png)
@@ -11,3 +11,13 @@
 
  * **folder** - для указания директории расположения oui.txt
  * **url** - ссылка для обновления файла oui.txt
+## Установка
+### From Source
+
+1. Download the latest release from https://github.com/shulepoff/maclookup/releases
+1. Extract files from archive
+1. `cd maclookup`
+1. `make && make install`
+
+По умолчанию программа устанавливается в `/usr/local/bin`. Если Вы желаете изменить место установки, запустите `sudo DESTDIR=/path/to/install/ make install`
+
