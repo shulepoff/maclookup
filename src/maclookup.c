@@ -111,7 +111,7 @@ void mac_lookup(void) {
 	}
 	while(fgets(temp,sizeof(temp),file) != NULL) {
 		if ((strstr(temp, globalArgs.macAddress)) != NULL) {
-			printf("\n%s\n",temp);
+			printf("%s",temp);
 		}
 	}
 	
