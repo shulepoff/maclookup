@@ -1,7 +1,7 @@
 DESTDIR ?= /usr/local
-MANDIR ?= share/man/man8
+MANDIR ?= share/man/man1
 SRC := src/maclookup.c
-MANS := $(wildcard docs/*.8.gz)
+MANS := $(wildcard docs/*.1.gz)
 CC = clang
 
 all:
@@ -12,4 +12,4 @@ install: all
 	cp -R $(MANS) $(DESTDIR)/$(MANDIR)
 uninstall: 
 	rm -f $(DESTDIR)/bin/maclookup
-	rm -f $(DESTDIR)/$(MANDIR)/maclookup.8.gz
+	rm -f $(DESTDIR)/$(MANDIR)/maclookup.1.gz

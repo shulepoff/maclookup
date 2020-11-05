@@ -4,14 +4,17 @@
 #include <string.h>
 #include <ctype.h>
 
+#define VERSION "0.2 alfa"
+
 struct globalArgs_t {
 	int updOui;		/* option -u */
 	int configure;	/* option -c */
 	int information; /* option -i */
+	int usage;	/* option -h */
 	char *macAddress; 
 } globalArgs;
 
-static const char *optString = "ucih?";
+static const char *optString = "ucihv";
 
 enum { Folder, Url, nKeys};
 char *keys[nKeys] = {
@@ -53,17 +56,9 @@ void rdconf(FILE *fd) {
 				config[i] = strdup(value);
 	}	
 }
-void display_usage(void) {
-	puts( "Maclookup 0.01 ( https://github.com/shulepoff/maclookup )");
-	puts( "	Display Vendor Information by MAC address");
-	puts( "USAGE: ");
-	puts( "	maclookup [-ucih] XX:XX:XX ");
-	puts( "OPTIONS: ");
-	puts( "	-c	- create config file");
-	puts( "	-i	- display info from configuration file");
-	puts( "	-u	- update oui.txt from web");
-	puts( "	-h	- display this help");
-	exit( EXIT_FAILURE);
+void display_usage(FILE *handle) 
+{
+	fputs("Usage: maclookup [-u][-v][-c][-i][-h] [MAC address]\n",handle);
 }
 char *mac_sanitize(char *mac){
 	int i,j;
@@ -153,37 +148,52 @@ int main(int argc, char *argv[] ) {
 	/* Init globalArgs before works */
 	globalArgs.updOui = 0;  /* False */
 	globalArgs.configure = 0;
+	globalArgs.usage = 0;
 	globalArgs.information = 0;
 	globalArgs.macAddress = NULL;
 
 	while((opt = getopt(argc, argv, optString)) != -1) {
 			switch(opt){
-				case 'u':
-					globalArgs.updOui = 1; /* True */
-					update_oui();
-					break;
-				case 'c':
-					globalArgs.configure = 1;
-					break;
-				case 'i':
-					globalArgs.information = 1;
-					info_display();
-					break;
-				case 'h':
-				case '?':
-					display_usage();
-					break;
-				default:
-					fprintf(stderr,"getopt");
+				case 'u':globalArgs.updOui = 1; break;
+				case 'c':globalArgs.configure = 1; break;
+				case 'i':globalArgs.information = 1; break;
+				case 'h':globalArgs.usage = 1; break;
+				case 'v':printf("Maclookup v %s \n", VERSION); exit(0);
+				case '?':globalArgs.usage = 2; break;
+				default: globalArgs.usage = 2; break;
 			}
 	}
+	if (globalArgs.updOui == 1)
+	{
+		update_oui();
+		exit(0);
+	}
+	if (globalArgs.information == 1)
+	{
+		info_display();
+		exit(0);
+	}
+	if (globalArgs.usage == 2)
+	{
+		display_usage(stderr);
+		fputs("Try `maclookup -h' for more information.\n",stderr);
+		exit(1);
+	}
+	if ( globalArgs.usage == 1)
+	{
+		display_usage(stdout);
+		fputs( "OPTIONS: \n",stdout);
+		fputs( "	-c	- create config file\n",stdout);
+		fputs( "	-i	- display info from configuration file\n",stdout);
+		fputs( "	-u	- update oui.txt from web\n",stdout);
+		fputs( "	-v	- display program version\n",stdout);
+		fputs( "	-h	- display this help\n",stdout);
+		exit(0);
+	}
+
 	globalArgs.macAddress = argv[optind];
 	if (globalArgs.macAddress){
 		globalArgs.macAddress = mac_sanitize(globalArgs.macAddress);
-	/*
-	printf("Update = %d, Config = %d, Information = %d \n", globalArgs.updOui, globalArgs.configure, globalArgs.information);
-	*/
-	// printf("MAC %s\n", globalArgs.macAddress);
 		mac_lookup();
 	}
 	return (EXIT_SUCCESS);
