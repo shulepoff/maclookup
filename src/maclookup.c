@@ -4,14 +4,14 @@
 #include <string.h>
 #include <ctype.h>
 
-#define VERSION "0.2 alfa"
+#define VERSION "0.3 alfa"
 
 struct globalArgs_t {
-	int updOui;		/* option -u */
-	int configure;	/* option -c */
-	int information; /* option -i */
-	int usage;	/* option -h */
-	char *macAddress; 
+	int updOui;       /* option -u */
+	int configure;    /* option -c */
+	int information;  /* option -i */
+	int usage;	      /* option -h */
+	char *macAddress; /* MAC */
 } globalArgs;
 
 static const char *optString = "ucihv";
@@ -56,7 +56,7 @@ void rdconf(FILE *fd) {
 				config[i] = strdup(value);
 	}	
 }
-void display_usage(FILE *handle) {
+void print_usage(FILE *handle) {
 	fputs("Usage: maclookup [-u][-v][-c][-i][-h] [MAC address]\n",handle);
 }
 char *mac_sanitize(char *mac) {
@@ -90,10 +90,10 @@ void opncfg(void) {
 	 rdconf(f);
      fclose(f);
 }	
-void info_display(void) {
+void print_info(void) {
 	printf("Folder ieee-data is %s \n",config[Folder]);
 	printf("URL for update oui.txt is %s \n",config[Url]);
-	exit( EXIT_FAILURE );
+	exit( EXIT_SUCCESS );
 }
 void mac_lookup(void) {
 	char temp[512];
@@ -104,8 +104,11 @@ void mac_lookup(void) {
 		exit( EXIT_FAILURE );
 	}
 	while(fgets(temp,sizeof(temp),file) != NULL) {
+		char oui[7];
 		if ((strstr(temp, globalArgs.macAddress)) != NULL) {
-			printf("%s",temp);
+			strncpy(oui,temp,6);
+			printf("%s %s",oui,temp+20);
+			break;
 		}
 	}
 	
@@ -167,16 +170,16 @@ int main(int argc, char *argv[] ) {
 		exit(0);
 	}
 	if (globalArgs.information == 1) {
-		info_display();
+		print_info();
 		exit(0);
 	}
 	if (globalArgs.usage == 2) {
-		display_usage(stderr);
+		print_usage(stderr);
 		fputs("Try `maclookup -h' for more information.\n",stderr);
 		exit(1);
 	}
 	if ( globalArgs.usage == 1)	{
-		display_usage(stdout);
+		print_usage(stdout);
 		fputs( "OPTIONS: \n",stdout);
 		fputs( " -c\tcreate config file\n",stdout);
 		fputs( " -i\tdisplay info from configuration file\n",stdout);
@@ -189,6 +192,11 @@ int main(int argc, char *argv[] ) {
 	globalArgs.macAddress = argv[optind];
 	if (globalArgs.macAddress) {
 		globalArgs.macAddress = mac_sanitize(globalArgs.macAddress);
+		if (strlen(globalArgs.macAddress)<6) {
+			fputs("MAC must be 6 char min\n",stderr);
+			print_usage(stderr);
+			exit(EXIT_FAILURE);
+		}
 		mac_lookup();
 	}
 	return (EXIT_SUCCESS);
