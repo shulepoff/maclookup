@@ -15,9 +15,13 @@
 ### From Source
 
 1. Download the latest release from https://github.com/shulepoff/maclookup/releases
-1. Extract files from archive
+1. Extract files from archive. `tar xzvf v0.3-alpha.tar.gz`
 1. `cd maclookup`
-1. `make && make install`
+1. `sudo make install`
 
 По умолчанию программа устанавливается в `/usr/local/bin`. Если Вы желаете изменить место установки, запустите `sudo DESTDIR=/path/to/install/ make install`
 
+## Удаление программы
+Перейдите в каталог с исходниками и выполните `sudo make uninstall`
+или
+удалите вручную файлы `/usr/local/bin/maclookup` и `/usr/share/man/man1/maclookup.1.gz`
