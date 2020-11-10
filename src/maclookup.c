@@ -69,7 +69,7 @@ char *mac_sanitize(char *mac)
         if(mac[i] >= 'a' && mac[i] <= 'z') {
             mac[i] = mac[i]-32;
         }
-        if (mac[i]==':' || mac[i]=='-' || mac[i]='.') continue;
+        if (mac[i]==':' || mac[i]=='-' || mac[i]=='.') continue;
         if (j<6) mac[j] = mac[i]; else mac[j]=0 ;
         j++;
     }
